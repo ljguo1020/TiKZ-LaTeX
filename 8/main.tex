@@ -1,0 +1,80 @@
+\documentclass[margin = 1cm]{standalone}
+\usepackage{tikz}
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+    \ior_new:N \g__csv_ior 
+    \ior_open:Nn \g__csv_ior {data.csv} 
+    \int_new:N \l_xaxis_int 
+    \int_set:Nn \l_xaxis_int {0}
+    \pgfdeclarelayer{lable}
+    \pgfsetlayers{main,lable}
+    \begin{tikzpicture}[x = .1cm,y = 4cm]
+    \foreach \x in {0.0,0.1,0.2,0.3,0.4,0.5,0.6}
+    {
+        \node[left,scale = .5] at (-1.5,\x) {\x};
+        \draw[line~width = .1pt] (-1,\x) --++ (-.7,0);
+    }
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \int_incr:N \l_xaxis_int 
+        \coordinate (gm-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{1});
+
+        \coordinate (ga-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2});
+
+        \coordinate (pm-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3});
+
+        \coordinate (pa-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{4});
+
+        \fill[blue] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{1}) circle(1pt);
+
+        \fill[orange] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2}) circle(1pt);
+
+        \fill[green!50!black] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3}) circle(1pt);
+
+        \fill[red] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{4}) circle(1pt);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[blue,line~width = .4pt,line~cap=round] (gm-#1) -- (gm-\int_eval:n{#1+1});
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[orange,line~width = .4pt,line~cap=round] (ga-#1) -- (ga-\int_eval:n{#1+1});
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[green!50!black,line~width = .4pt,line~cap=round] (pm-#1) -- (pm-\int_eval:n{#1+1});
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[red,line~width = .4pt,line~cap=round] (pa-#1) -- (pa-\int_eval:n{#1+1});
+    }
+    \draw[line~width = .1pt] (-1,-.03) rectangle (50.5,.7);
+    \foreach \x in {0,10,...,50} {
+        \node[scale = .5] at (\x,-.09) {\x};
+        \draw[line~width = .1pt] (\x,-.03) --++ (0,-.02);
+    }
+    \node[font = \bfseries,scale = .5,rotate = 90] at (-6,0.35) {Deviation(mm)};
+    \node[font = \bfseries,scale = .5] at (25,-.15) {Point~No};
+    \node[font = \bfseries,scale = .5] at (25,0.74) {Optimized~vs~Prior~Thickness~Deviations};
+    \begin{pgfonlayer}{lable}
+        \node[draw,line~width = .1pt,anchor = north~west,inner~sep = 1pt,fill = white,opacity = .8,rounded~corners = 1pt] at (-.05,.68){
+        \tikz[] {
+           \draw[line~width = .4pt,blue,line~cap=round] (0,0) -- (4,0);
+           \fill[blue] (2,0) circle(1pt);
+           \node[scale = .4,anchor = west] at (5,0) {Good~Max~Deviation};
+           \draw[line~width = .4pt,orange,line~cap=round] (0,-.04) -- (4,-.04);
+           \fill[orange] (2,-.04) circle(1pt);
+           \node[scale = .4,anchor = west] at (5,-.04) {Good~Avg~Deviation};
+           \draw[line~width = .4pt,green!50!black,line~cap=round] (0,-.08) -- (4,-.08);
+           \fill[green!50!black] (2,-.08) circle(1pt);
+           \node[scale = .4,anchor = west] at (5,-.08) {Poor~Max~Deviation};
+           \draw[line~width = .4pt,red,line~cap=round] (0,-.12) -- (4,-.12);
+           \fill[red] (2,-.12) circle(1pt);
+           \node[scale = .4,anchor = west] at (5,-.12) {Poor~Avg~Deviation};
+        }
+    };
+      \end{pgfonlayer}  
+      
+    \end{tikzpicture}
+    \ior_close:N \g__csv_ior
+
+\ExplSyntaxOff
+\end{document}

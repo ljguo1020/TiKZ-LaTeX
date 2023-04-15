@@ -1,0 +1,53 @@
+\documentclass[margin = 1cm]{standalone}
+\usepackage{tikz}
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+    \ior_new:N \g__csv_ior 
+    \ior_open:Nn \g__csv_ior {blue_data.csv} 
+    \ior_new:N \g__csv_red_ior 
+    \ior_open:Nn \g__csv_red_ior {red_data.csv} 
+    \begin{tikzpicture}[x = 289cm, y = 100cm]
+    \foreach \x in {0.002,0.004,0.006,0.008}
+    {
+        \node[left = 0pt,scale = .15] at (-1pt,\x) {\x};
+        \draw[line~width = .1pt] (0,\x) --++ (-1pt,0);
+    }
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+
+        \node[scale = .1, inner~sep = 0pt] at (\seq_item:Nn\l_tmpa_seq{1},\seq_item:Nn\l_tmpa_seq{2}){
+            \tikz{
+                \draw[blue,line~width = .4pt] (0,0) circle(.8pt);
+                \fill[blue,opacity = 0.5] (0,0) circle (1.3pt);
+            }
+        };
+
+    }
+    \ior_str_map_variable:NNn \g__csv_red_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \node[scale = .1, inner~sep = 0pt] at (\seq_item:Nn\l_tmpa_seq{1},\seq_item:Nn\l_tmpa_seq{2}){
+            \tikz{
+                \draw[red,line~width = .4pt] (0,0) circle(.8pt);
+                \fill[red,opacity = 0.5] (0,0) circle (1.3pt);
+            }
+        };
+
+    }
+
+    \draw[line~width = .1pt] (0,0) rectangle (0.0055,0.0085);
+
+    \foreach \x in {0.001,0.002,0.003,0.004,0.005} {
+        \draw[line~width = .1pt] (\x,0) --++ (0,-1pt);
+        \node[scale = .15,below = 1pt] at (\x,-1pt) {\x};
+    }
+    
+
+    \node[scale = .2,font = \bfseries] at (0.00275,-5pt) {T2};
+    \node[scale = .2,font = \bfseries,rotate = 90] at (-8pt,0.00425){T1};
+    \end{tikzpicture}
+    \ior_close:N \g__csv_red_ior
+    \ior_close:N \g__csv_ior
+
+\ExplSyntaxOff
+\end{document}

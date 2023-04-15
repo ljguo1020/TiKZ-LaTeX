@@ -1,0 +1,119 @@
+\documentclass[margin = 1cm]{standalone}
+\usepackage{pgfplots}
+
+\pgfplotsset{compat=1.18}
+
+\usetikzlibrary{matrix}
+\pgfdeclareverticalshading{myshading}{.75cm}
+{
+    rgb(0cm)=(0.231, 0.298, 0.753);
+    rgb(1.5cm)=(0.408, 0.541, 0.937);
+    rgb(3cm)=(0.612, 0.741, 1.000);
+    rgb(4.5cm)=(0.800, 0.851, 0.929);
+    rgb(6cm)=(0.937, 0.808, 0.741);
+    rgb(7.5cm)=(0.961, 0.631, 0.510);
+    rgb(9cm)=(0.867, 0.373, 0.294);
+    rgb(10.5cm)=(0.796, 0.310, 0.404)
+}
+
+\pgfmathdeclarefunction{colordata}{1}{\begingroup 
+    \pgfmathparse{1000*#1/1.4+800/1.4}%
+    \tikzset{color of colormap={\pgfmathresult}}%
+    \extractcolorspec{.}\pgfmathresult
+    \pgfmathsmuggle\pgfmathresult
+\endgroup}
+
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+\ior_new:N \g__csv_ior 
+\ior_open:Nn \g__csv_ior {data.csv} 
+
+
+\begin{tikzpicture}[every~node/.style={minimum~size = 1.5cm,outer~sep = 0pt, font = \small,inner~sep = 0pt}]
+
+
+    \node[anchor = south~west,inner~sep = 0pt] at (6.5,-6) {\pgfuseshading{myshading}};
+    \foreach \x in {-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6} {
+        \pgfmathparse{7.5 * \x }
+        \draw[] (7.6,\pgfmathresult) --++ (.1,0)node[right = -8pt,font = \small]{\x};
+    }  
+
+
+    % \fill (-6,-6) circle(2pt);
+
+    \foreach \x[count = \xc] in {Injection_time, Mold_temperature, Melt_temperature, Packing_pressure, Packing_time, Cooling_time, warp, Displacements_core}
+    {
+        \foreach \y[count = \yc] in {-5.25,-3.75,...,3.75,5.25} {
+            \ifnum\xc=\yc%
+                \node[font = \small,below,scale = .5] at (\y,-6) {\x};
+            \fi 
+        }
+    }
+
+    \foreach \x[count = \xc] in {Displacements_core, warp,Cooling_time, Packing_time, Packing_pressure, Melt_temperature, Mold_temperature, Injection_time} 
+    {
+        \foreach \y[count = \yc] in {-5.25,-3.75,...,3.75,5.25} {
+            \ifnum \xc=\yc%
+                \node[font = \small,above,scale = .5,rotate = 90] at (-6,\y) {\x};
+            \fi 
+        }
+    }
+
+    \node[font = \bfseries\small] at (1,7) {Correlation Matrix Heatmap};
+
+    
+
+
+
+
+
+    \pgfplotsset{colormap={mybluered}{
+        rgb(0cm)=(0.231, 0.298, 0.753);
+        rgb(1.5cm)=(0.408, 0.541, 0.937);
+        rgb(3cm)=(0.612, 0.741, 1.000);
+        rgb(4.5cm)=(0.800, 0.851, 0.929);
+        rgb(6cm)=(0.937, 0.808, 0.741);
+        rgb(7.5cm)=(0.961, 0.631, 0.510);
+        rgb(9cm)=(0.867, 0.373, 0.294);
+        rgb(10.5cm)=(0.796, 0.310, 0.404)
+    }}
+    \tl_new:N \l_matrix_tl 
+    \int_new:N \l_row_int 
+    \int_zero:N \l_row_int 
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \int_incr:N \l_row_int 
+        \int_step_inline:nn{\seq_count:N \l_tmpa_seq}{
+            % 定义颜色
+            \exp_args:Nx\pgfmathparse{colordata(\seq_item:Nn \l_tmpa_seq {#1})}
+            \definecolor{color - \int_use:N \l_row_int - #1}{rgb}{\expandafter\use_ii:nn\pgfmathresult}
+            %保存数据
+
+            \int_compare:nTF{#1 < \l_row_int}{
+             \exp_args:Nnx \seq_put_right:Nn \l_tmpb_seq {|[fill = color - \int_use:N \l_row_int - #1]|\fp_eval:n{round(\seq_item:Nn \l_tmpa_seq {#1},2)}}
+            }{
+              \exp_args:Nnx \seq_put_right:Nn \l_tmpb_seq {|[fill = none]|\noexpand\phantom{0.00}}
+            }
+        }
+        \exp_args:NNx \tl_gput_right:Nn \l_matrix_tl {\seq_use:Nn \l_tmpb_seq {\&} \\}
+        \seq_clear:N \l_tmpb_seq
+    }
+    
+
+    \exp_not:n {
+        \matrix [matrix~of~nodes,ampersand~replacement=\&]
+        {
+          \exp_not:V \l_matrix_tl
+        };  
+    }
+
+\end{tikzpicture}   
+
+\ior_close:N \g__csv_ior
+\ExplSyntaxOff
+
+
+
+
+\end{document}

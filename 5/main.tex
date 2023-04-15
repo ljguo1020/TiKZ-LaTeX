@@ -1,0 +1,59 @@
+\documentclass[margin = .5cm]{standalone}
+\usepackage{tikz}
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+    \ior_new:N \g__csv_ior 
+    \ior_open:Nn \g__csv_ior {data.csv} 
+    \int_new:N \l_xaxis_int 
+    \int_set:Nn \l_xaxis_int {0}
+    \begin{tikzpicture}[x = 0.002cm,y = 1cm]
+    
+    \foreach \x in {0.0,0.2,0.4,0.6,0.8}
+    {
+        \node[left,scale = .15] at (-30,\x) {\x};
+        \draw[line~width = .1pt] (-20,\x) --++ (-10,0);
+    }
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \fp_compare:nT{
+            \seq_item:Nn\l_tmpa_seq{1} > 0 &&
+            \seq_item:Nn\l_tmpa_seq{2} > 0
+        }{
+            \int_incr:N \l_xaxis_int 
+            \coordinate (sd-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{1});
+            \coordinate (sl-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2});
+        }
+        % \fill[blue] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2}) circle(1pt);
+
+        % \fill[orange] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3}) circle(1pt);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[blue,very~thin,line~cap=round] (sd-#1) -- (sd-\int_eval:n{#1+1});
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[orange,very~thin,line~cap=round] (sl-#1) -- (sl-\int_eval:n{#1+1});
+    }
+    \draw[line~width = .1pt] (-20,-.1) rectangle (810,1);
+
+    \foreach \x in {0,100,...,800} {
+        \draw[line~width = .1pt] (\x,-.1) --++ (0,-.02);
+        \node[scale = .15,below = 5pt] at (\x,-.1) {\x};
+    }
+    
+    \node[font = \bfseries,scale = .2,rotate = 90] at (-100,0.5) {R2~Score};
+    \node[font = \bfseries,scale = .2] at (400,-.3) {Iteration};
+    % \node[font = \bfseries,scale = .7] at (25,4.2) {Overall~Wax~Thickness};
+    \node[draw,line~width = .1pt,anchor = south,inner~sep = 1pt] at (600,-0.05){
+        \tikz[] {
+           \draw[line~width = .1pt,blue,line~cap=round] (0,0) -- (50,0);
+           \node[scale = .15,anchor = west] at (60,0) {Bayesian~Optimization};
+           \draw[line~width = .1pt,orange,line~cap=round] (0,-.1) -- (50,-.1);
+           \node[scale = .15,anchor = west] at (60,-0.1) {LHS};
+        }
+    };
+    \end{tikzpicture}
+    \ior_close:N \g__csv_ior
+
+\ExplSyntaxOff
+\end{document}

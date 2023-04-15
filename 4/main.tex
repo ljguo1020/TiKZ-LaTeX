@@ -1,0 +1,51 @@
+\documentclass[margin = 1cm]{standalone}
+\usepackage{tikz}
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+    \ior_new:N \g__csv_ior 
+    \ior_open:Nn \g__csv_ior {data.csv} 
+    \int_new:N \l_xaxis_int 
+    \int_set:Nn \l_xaxis_int {0}
+    \begin{tikzpicture}[x = .14cm,y = 2cm,scale=2.0]
+    \foreach \x in {2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0}
+    {
+        \node[left,scale = .5] at (0,\x) {\x};
+        \draw[line~width = .1pt] (0,\x) -- (50,\x);
+    }
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \int_incr:N \l_xaxis_int 
+        \coordinate (sd-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2});
+
+        \coordinate (sl-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3});
+
+        % \fill[blue] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2}) circle(1pt);
+
+        % \fill[orange] (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3}) circle(1pt);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[blue,very~thick,line~cap=round] (sd-#1) -- (sd-\int_eval:n{#1+1});
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[orange,very~thick,line~cap=round] (sl-#1) -- (sl-\int_eval:n{#1+1});
+    }
+    \foreach \x in {1,6,11,16,21,26,31,36,41,46} {
+        \node[scale = .4,below = 5pt] at (\x,2) {Ref\str_use:N\_ P\x};
+    }
+    \node[font = \bfseries,scale = .7,rotate = 90] at (-5,3) {Thickness(mm)};
+    \node[font = \bfseries,scale = .7] at (25,1.7) {Point~No};
+    \node[font = \bfseries,scale = .7] at (25,4.2) {Overall~Wax~Thickness};
+    \node[] at (40,2.1){
+        \tikz[] {
+           \draw[very~thick,blue,line~cap=round] (0,0) -- (3,0);
+           \node[scale = .4,anchor = west] at (3.5,0) {Standard};
+           \draw[very~thick,orange,line~cap=round] (10,0) -- (13,0);
+           \node[scale = .4,anchor = west] at (13.5,0) {Simulation};
+        }
+    };
+    \end{tikzpicture}
+    \ior_close:N \g__csv_ior
+
+\ExplSyntaxOff
+\end{document}

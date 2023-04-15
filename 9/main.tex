@@ -1,0 +1,93 @@
+\documentclass[margin = 1cm]{standalone}
+\usepackage{tikz}
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \regex_split:nnN { nVN }
+    \ior_new:N \g__csv_ior 
+    \ior_open:Nn \g__csv_ior {data.csv} 
+    \int_new:N \l_xaxis_int 
+    \int_set:Nn \l_xaxis_int {0}
+    \pgfdeclarelayer{lable}
+    \pgfsetlayers{main,lable}
+    \begin{tikzpicture}[x = .1cm,y = 220cm]
+    \foreach \x in {-0.004,-0.002,0.000,0.002,0.004,0.006,0.008}
+    {
+        \node[left,scale = .3] at (-6,\x) {\x};
+        \draw[line~width = .1pt] (-5,\x) --++ (-2pt,0);
+    }
+    \ior_str_map_variable:NNn \g__csv_ior \l_tmpa_str {
+        \regex_split:nVN {,} \l_tmpa_str \l_tmpa_seq
+        \int_incr:N \l_xaxis_int 
+
+        
+        \node[scale = .5,inner~sep=0pt] (raw-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{1}){\tikz{\draw[gray,line~width = .2pt](0\str_use:N\c_colon_str 1pt) -- (90\str_use:N\c_colon_str 1.5pt) -- (180\str_use:N\c_colon_str 1pt) -- (270\str_use:N\c_colon_str 1.5pt) -- cycle;}};
+
+        \node[scale = .5,inner~sep=0pt] (svr-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{2}){\tikz{\draw[blue,line~width = .2pt]circle (1pt);}};
+
+        \node[scale = .5,inner~sep=0pt] (gpr-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{3}){\tikz{\draw[green!50!black,line~width = .2pt](90\str_use:N\c_colon_str 1pt) -- (210\str_use:N\c_colon_str 1pt) -- (330\str_use:N\c_colon_str 1pt) -- cycle;}};
+
+        \node[scale = .5,inner~sep=0pt] (gbr-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{4}){\tikz{\draw[red,line~width = .2pt](45\str_use:N\c_colon_str 1pt) -- (135\str_use:N\c_colon_str 1pt) -- (225\str_use:N\c_colon_str 1pt) -- (315\str_use:N\c_colon_str 1pt) -- cycle;}};
+
+        \node[scale = .5,inner~sep=0pt] (rfr-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{5}){\tikz{\draw[purple,line~width = .2pt](30\str_use:N\c_colon_str 1pt) -- (150\str_use:N\c_colon_str 1pt) -- (270\str_use:N\c_colon_str 1pt) -- cycle;}};
+
+        \node[scale = .5,inner~sep=0pt] (xgbr-\int_use:N\l_xaxis_int) at (\int_use:N \l_xaxis_int, \seq_item:Nn\l_tmpa_seq{6}){\tikz{\draw[brown,line~width = .2pt](0\str_use:N\c_colon_str 1pt) -- (120\str_use:N\c_colon_str 1pt) -- (240\str_use:N\c_colon_str 1pt) -- cycle;}};
+
+    }
+
+
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[blue,line~width = .1pt,line~cap=round] (svr-#1.center) -- (svr-\int_eval:n{#1+1}.center);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[green!50!black,line~width = .1pt,line~cap=round] (gpr-#1.center) -- (gpr-\int_eval:n{#1+1}.center);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[red,line~width = .1pt,line~cap=round] (gbr-#1.center) -- (gbr-\int_eval:n{#1+1}.center);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[purple,line~width = .1pt,line~cap=round] (rfr-#1.center) -- (rfr-\int_eval:n{#1+1}.center);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[brown,line~width = .1pt,line~cap=round] (xgbr-#1.center) -- (xgbr-\int_eval:n{#1+1}.center);
+    }
+    \int_step_inline:nn{\int_use:N \l_xaxis_int - 1} {
+        \draw[gray,line~width = .1pt,line~cap=round] (raw-#1.center) -- (raw-\int_eval:n{#1+1}.center);
+    }
+    \draw[line~width = .1pt] (-5,-0.005) rectangle (112,0.0085);
+    \foreach \x in {0,1,...,107} {
+        \node[scale = .3,below = 8pt] at (\x,-.005) {\x};
+        \draw[line~width = .1pt] (\x,-.005) --++ (0,-2pt);
+    }
+    \node[font = \bfseries,scale = .3,rotate = 90] at (-10,0.00175) {warp~mm};
+    \node[font = \bfseries,scale = .3] at (53.5,-.0065) {number};
+    \node[font = \bfseries,scale = .3] at (53.5,0.009) {wrap~Graph};
+    \begin{pgfonlayer}{lable}
+        \node[draw,line~width = .1pt,anchor = south~west,inner~sep = 1pt,fill = white,opacity = .8] at (115,-0.005){
+        \tikz[anchor=center] {
+            \draw[line~width = .2pt,gray] (0,0) -- (4,0);
+            \node[] at (2,0) {\tikz{\draw[gray,line~width = .2pt](0\str_use:N\c_colon_str 1pt) -- (90\str_use:N\c_colon_str 1.5pt) -- (180\str_use:N\c_colon_str 1pt) -- (270\str_use:N\c_colon_str 1.5pt) -- cycle;}};
+            \node[anchor = west,scale = .3] at (4.5,0) {RAW};
+            \draw[line~width = .2pt,brown] (0,0.0005) -- (4,0.0005);
+            \node[] at (2,0.0005) {\tikz{\draw[brown,line~width = .2pt](0\str_use:N\c_colon_str 1pt) -- (120\str_use:N\c_colon_str 1pt) -- (240\str_use:N\c_colon_str 1pt) -- cycle;}};
+            \node[anchor = west,scale = .3] at (4.5,0.0005) {XGBR};
+            \draw[line~width = .2pt,purple] (0,0.001) -- (4,0.001);
+            \node[] at (2,0.001) {\tikz{\draw[purple,line~width = .2pt](30\str_use:N\c_colon_str 1pt) -- (150\str_use:N\c_colon_str 1pt) -- (270\str_use:N\c_colon_str 1pt) -- cycle;}};
+            \node[anchor = west,scale = .3] at (4.5,0.001) {RFR};
+            \draw[line~width = .2pt,red] (0,0.0015) -- (4,0.0015);
+            \node[] at (2,0.0015) {\tikz{\draw[red,line~width = .2pt](45\str_use:N\c_colon_str 1pt) -- (135\str_use:N\c_colon_str 1pt) -- (225\str_use:N\c_colon_str 1pt) -- (315\str_use:N\c_colon_str 1pt) -- cycle;}};
+            \node[anchor = west,scale = .3] at (4.5,0.0015) {GBR};
+            \draw[line~width = .2pt,green!50!black] (0,0.002) -- (4,0.002);
+            \node[] at (2,0.002) {\tikz{\draw[green!50!black,line~width = .2pt](90\str_use:N\c_colon_str 1pt) -- (210\str_use:N\c_colon_str 1pt) -- (330\str_use:N\c_colon_str 1pt) -- cycle;}};
+            \node[anchor = west,scale = .3] at (4.5,0.002) {GPR};
+            \draw[line~width = .2pt,blue] (0,0.0025) -- (4,0.0025);
+            \node[] at (2,0.0025) {\tikz{\draw[blue,line~width = .2pt]circle (1pt);}};
+            \node[anchor = west,scale = .3] at (4.5,0.0025) {SVR};
+        }
+    };
+      \end{pgfonlayer}  
+      
+    \end{tikzpicture}
+    \ior_close:N \g__csv_ior
+
+\ExplSyntaxOff
+\end{document}
